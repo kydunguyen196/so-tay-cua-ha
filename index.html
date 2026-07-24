@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IC.note — Sổ tay ôn thi Vi mạch bán dẫn</title>
+<link rel="stylesheet" href="assets/css/fonts.css?v=5">
+<link rel="stylesheet" href="assets/css/main.css?v=5">
+</head>
+<body>
+<div id="scrollbar"></div>
+
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="mark"></span>IC.note</a>
+  <nav class="toplinks">
+    <a href="#subjects">Môn học</a>
+    <a href="#features">Tính năng</a>
+    <a href="quiz.html">Quiz</a>
+  </nav>
+  <div class="topbar-right">
+    <div class="lang-toggle" data-lang-toggle>
+      <button data-lang-opt="vi">VI</button>
+      <button data-lang-opt="en">EN</button>
+    </div>
+    <a class="cta-mini" href="#subjects">Vào ôn thi</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow-pill anim-hidden" id="eyebrow"><span class="dot"></span>IC.note · Sổ tay vi mạch bán dẫn</span>
+    <h1 class="hero-title" id="heroTitle">Ôn thi <em>nhẹ nhàng</em> cho kỹ sư Hà.</h1>
+    <p class="hero-lede anim-hidden" id="heroLede">Gộp 4 môn học vào một sổ tay duy nhất — ghi chú cô đọng theo chương, quiz chấm điểm ngay, tiến độ tự lưu lại mỗi lần quay về.</p>
+    <p class="hero-wish anim-hidden" id="heroWish">💜 Gửi Hà — chúc em <em>học thật tốt</em> và <em>thi thật tốt</em> nhé!</p>
+    <div class="hero-actions anim-hidden" id="heroActions">
+      <a class="pill-btn primary magnetic" href="#subjects">Bắt đầu ôn tập</a>
+      <a class="pill-btn ghost-light magnetic" href="subject.html">Xem ghi chú</a>
+    </div>
+  </div>
+  <div class="stat-strip" id="statStrip"></div>
+</section>
+
+<div class="dark-shell-wrap">
+<div class="dark-shell">
+<section class="dark-section">
+  <h2 class="reveal-heading" id="revealHeading">Toàn bộ <em>sức mạnh</em> ôn thi, một nơi.</h2>
+  <p class="dark-lede anim-hidden" id="darkLede">Ghi chú, quiz và giáo trình gốc — đồng bộ theo từng chương, dựng trên chính tài liệu của bạn.</p>
+  <div class="dark-actions anim-hidden" id="darkActions">
+    <a class="pill-btn solid-white magnetic" href="subject.html">Vào sổ tay</a>
+    <a class="pill-btn ghost-dark magnetic" href="quiz.html">Làm quiz</a>
+  </div>
+
+  <div class="browser-frame anim-hidden" id="browserFrame">
+    <div class="browser-chrome">
+      <span class="tl r"></span><span class="tl y"></span><span class="tl g"></span>
+      <span class="url" id="frameUrl">icnote.app/vat-ly-ban-dan</span>
+    </div>
+    <div class="browser-body">
+      <div class="b-sidebar" id="frameSidebar"></div>
+      <div class="b-main">
+        <h4 id="frameSubjectName">—</h4>
+        <p class="sub" id="frameSubjectMeta">—</p>
+        <table class="b-table">
+          <thead><tr><th>Chương</th><th>Trạng thái</th><th>Tiến độ</th></tr></thead>
+          <tbody id="frameChapterRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-dark-flow" id="features">
+  <div class="section-inner">
+    <div class="section-head-center anim-hidden" id="featuresHead">
+      <h2>Ôn tập thông minh hơn</h2>
+      <p>Không chỉ đọc lại ghi chú — 4 tính năng để việc ôn thi bớt nhàm chán và nhớ lâu hơn.</p>
+    </div>
+    <div class="grid-2" id="featuresGrid">
+      <div class="card-dark anim-hidden">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z"/><path d="M14 3v5h5"/><path d="M8 13h8M8 17h5"/></svg></div>
+        <h3>Thẻ ghi nhớ lặp lại ngắt quãng</h3>
+        <p>Công thức hay quên tự động quay lại sớm hơn, thẻ đã thuộc giãn ra xa — theo đúng đường cong lãng quên.</p>
+        <div class="flash-demo"><div class="flash-card">E<sub>g</sub> của Silic ở 300K ≈ ?</div></div>
+      </div>
+      <div class="card-dark anim-hidden">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 3v3M16 3v3"/></svg></div>
+        <h3>Lịch ôn tập &amp; chuỗi ngày</h3>
+        <p>Bản đồ nhiệt như GitHub — nhìn một cái biết mình đã đều đặn ôn bài hay đang bỏ bê môn nào.</p>
+        <div class="heatmap" id="heatmap"></div>
+        <div class="streak-line" id="streakLine">🔥 0 ngày liên tục</div>
+      </div>
+      <div class="card-dark anim-hidden">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <h3>Tự phát hiện điểm yếu</h3>
+        <p>Gom các câu sai theo chủ đề, gợi ý đúng chương cần ôn lại thay vì đọc lại từ đầu.</p>
+        <div class="weak-tags" id="weakTags"><span class="weak-tag mid">Chưa có dữ liệu — làm quiz để bắt đầu</span></div>
+      </div>
+      <div class="card-dark anim-hidden">
+        <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></div>
+        <h3>Thi thử đếm giờ</h3>
+        <p>Trộn câu hỏi cả 4 môn, giới hạn thời gian thật — mô phỏng đúng áp lực phòng thi trước ngày quan trọng.</p>
+        <a class="pill-btn ghost-dark sm" href="quiz.html?mode=exam">Vào thi thử →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-dark-flow" id="subjects">
+  <div class="section-inner">
+    <div class="section-head-split anim-hidden" id="subjectsHead">
+      <div>
+        <h2>4 môn học</h2>
+        <p>Từ vật lý nền tảng đến kiến trúc SoC — chọn môn đang ôn, mọi tiến độ được lưu riêng.</p>
+      </div>
+    </div>
+    <div class="grid-2" id="subjectsGrid"></div>
+  </div>
+</section>
+</div>
+</div>
+
+<section class="cta-section">
+  <div class="cta-inner anim-hidden" id="ctaInner">
+    <div class="cta-icon"></div>
+    <h2>Sẵn sàng ôn thi chưa?</h2>
+    <p>Nội dung hiện là dữ liệu mẫu — nạp giáo trình thật vào <code>assets/js/data.js</code> là dùng được ngay.</p>
+    <div class="cta-actions">
+      <a class="pill-btn primary magnetic" href="subject.html">Bắt đầu ngay</a>
+      <a class="pill-btn ghost-light magnetic" href="quiz.html">Làm quiz thử</a>
+    </div>
+  </div>
+</section>
+
+<footer>IC.note — sổ tay ôn thi vi mạch bán dẫn</footer>
+
+<script src="assets/js/anime.iife.min.js?v=5"></script>
+<script src="assets/js/data.js?v=5"></script>
+<script src="assets/js/app.js?v=5"></script>
+<script>
+(function () {
+  var STAT_LABELS = [
+    { vi: "Chương", en: "Chapters" },
+    { vi: "Câu quiz", en: "Quiz questions" },
+    { vi: "Môn học", en: "Subjects" },
+    { vi: "Đã hoàn thành", en: "Completed" }
+  ];
+  var L = {
+    done: { vi: "Hoàn thành", en: "Done" },
+    notStarted: { vi: "Chưa bắt đầu", en: "Not started" },
+    chapters: { vi: "chương", en: "chapters" },
+    quizzes: { vi: "câu quiz", en: "quiz questions" },
+    pctDone: { vi: "% hoàn thành", en: "% done" },
+    streak: { vi: "ngày liên tục", en: "day streak" },
+    wrongTimes: { vi: "lần sai", en: "misses" }
+  };
+
+  /* ---------- dải thống kê ---------- */
+  function renderStatStrip(isRelang) {
+    var totalChapters = 0, totalQuiz = 0, doneChapters = 0;
+    IC_DATA.subjects.forEach(function (s) {
+      totalChapters += s.chapters.length;
+      totalQuiz += s.quiz.length;
+      doneChapters += IC.subjectProgress(s).done;
+    });
+    var overallPct = totalChapters ? Math.round(doneChapters * 100 / totalChapters) : 0;
+    var vals = [totalChapters, totalQuiz, IC_DATA.subjects.length, overallPct];
+    var suffixes = ["", "", "", "%"];
+    var strip = document.getElementById("statStrip");
+    strip.innerHTML = "";
+    STAT_LABELS.forEach(function (label, i) {
+      var d = document.createElement("div");
+      d.className = isRelang ? "stat-item" : "stat-item anim-hidden";
+      d.innerHTML = '<div class="stat-num" data-target="' + vals[i] + '" data-suffix="' + suffixes[i] + '">' + (isRelang ? vals[i] + suffixes[i] : "0") + '</div>' +
+                    '<div class="stat-label">' + IC.t(label) + "</div>";
+      strip.appendChild(d);
+    });
+  }
+
+  /* ---------- browser-frame mockup ---------- */
+  function renderBrowserFrame() {
+    var first = IC_DATA.subjects[0];
+    var sb = document.getElementById("frameSidebar");
+    sb.innerHTML = '<div class="brow">Dashboard</div>' + IC_DATA.subjects.map(function (s, i) {
+      return '<div class="brow' + (i === 0 ? " active" : "") + '">' + IC.t(s.name).split("(")[0].trim() + "</div>";
+    }).join("");
+    document.getElementById("frameSubjectName").textContent = IC.t(first.name);
+    document.getElementById("frameSubjectMeta").textContent =
+      first.chapters.length + " " + IC.t(L.chapters) + " · " + first.quiz.length + " " + IC.t(L.quizzes);
+    var done = IC.getDone(first.id);
+    document.getElementById("frameChapterRows").innerHTML = first.chapters.slice(0, 4).map(function (c, i) {
+      var isDone = !!done[c.id];
+      return "<tr><td>" + String(i + 1).padStart(2, "0") + ". " + IC.t(c.title) + "</td>" +
+        "<td>" + (isDone ? IC.t(L.done) : IC.t(L.notStarted)) + "</td>" +
+        '<td><span class="pct-pill">' + (isDone ? "100%" : "0%") + "</span></td></tr>";
+    }).join("");
+  }
+
+  /* ---------- card 4 môn ---------- */
+  function renderSubjectCards(isRelang) {
+    var grid = document.getElementById("subjectsGrid");
+    grid.innerHTML = "";
+    IC_DATA.subjects.forEach(function (s) {
+      var p = IC.subjectProgress(s);
+      var card = document.createElement("a");
+      card.className = isRelang ? "card-dark" : "card-dark anim-hidden";
+      card.href = "subject.html?mon=" + s.id;
+      card.style.display = "block";
+      card.innerHTML =
+        '<span class="subj-tag">' + IC.t(s.tag) + "</span>" +
+        "<h3>" + IC.t(s.name) + "</h3>" +
+        "<p>" + IC.t(s.desc) + "</p>" +
+        '<div class="subj-bar-track"><div class="subj-bar-fill" data-target="' + p.pct + '" style="width:' + (isRelang ? p.pct : 0) + '%"></div></div>' +
+        '<div class="badges">' +
+          (p.pct > 0 ? '<span class="badge accent">' + p.pct + IC.t(L.pctDone) + "</span>" : '<span class="badge">' + IC.t(L.notStarted) + "</span>") +
+          '<span class="badge">' + s.chapters.length + " " + IC.t(L.chapters) + "</span>" +
+          '<span class="badge">' + s.quiz.length + " " + IC.t(L.quizzes) + "</span>" +
+        "</div>";
+      grid.appendChild(card);
+    });
+  }
+
+  /* ---------- heatmap + streak ---------- */
+  function renderHeatmap() {
+    var hm = document.getElementById("heatmap");
+    hm.innerHTML = "";
+    var log = IC.getActivity();
+    var today = new Date();
+    for (var i = 27; i >= 0; i--) {
+      var d = new Date(today); d.setDate(d.getDate() - i);
+      var key = d.toISOString().slice(0, 10);
+      var count = log[key] || 0;
+      var level = count === 0 ? 0 : count < 3 ? 1 : count < 6 ? 2 : 3;
+      var cell = document.createElement("i");
+      cell.style.background = "var(--heat-" + level + ")";
+      cell.title = key + " · " + count;
+      hm.appendChild(cell);
+    }
+    document.getElementById("streakLine").textContent = "🔥 " + IC.currentStreak() + " " + IC.t(L.streak);
+  }
+
+  /* ---------- điểm yếu tổng hợp ---------- */
+  function renderWeakTags() {
+    var weakAll = [];
+    IC_DATA.subjects.forEach(function (s) {
+      var stat = IC.getQuizStat(s.id);
+      Object.keys(stat.wrongByChapter || {}).forEach(function (chId) {
+        var ch = s.chapters.find(function (c) { return c.id === chId; });
+        if (ch) weakAll.push({ title: IC.t(ch.title), count: stat.wrongByChapter[chId], subject: s.id });
+      });
+    });
+    if (weakAll.length) {
+      weakAll.sort(function (a, b) { return b.count - a.count; });
+      document.getElementById("weakTags").innerHTML = weakAll.slice(0, 4).map(function (w) {
+        return '<a class="weak-tag" href="subject.html?mon=' + w.subject + '">' + w.title + " (" + w.count + " " + IC.t(L.wrongTimes) + ")</a>";
+      }).join("");
+    }
+  }
+
+  renderStatStrip(false);
+  renderBrowserFrame();
+  renderSubjectCards(false);
+  renderHeatmap();
+  renderWeakTags();
+
+  /* cập nhật lại toàn bộ nội dung phụ thuộc dữ liệu khi đổi ngôn ngữ (không phát lại animation) */
+  document.addEventListener("icnote:langchange", function () {
+    renderStatStrip(true);
+    renderBrowserFrame();
+    renderSubjectCards(true);
+    renderHeatmap();
+    renderWeakTags();
+  });
+
+  /* ---------- animation intro hero (§3.1) ---------- */
+  if (IC.canAnimate) {
+    IC.splitWords(document.getElementById("heroTitle"));
+    var tl = anime.createTimeline({ defaults: { ease: "outQuad" } });
+    tl.add("#eyebrow", IC.m({ opacity: [0, 1], translateY: [10, 0], duration: 500 }))
+      .add("#heroTitle .word", IC.m({ opacity: [0, 1], filter: ["blur(8px)", "blur(0px)"], translateY: [14, 0], delay: anime.stagger(45), duration: 600 }), "-=250")
+      .add("#heroLede", IC.m({ opacity: [0, 1], translateY: [10, 0], duration: 500 }), "-=250")
+      .add("#heroWish", IC.m({ opacity: [0, 1], translateY: [10, 0], duration: 500 }), "-=250")
+      .add("#heroActions", IC.m({ opacity: [0, 1], translateY: [10, 0], duration: 500 }), "-=300")
+      .add("#statStrip .stat-item", IC.m({ opacity: [0, 1], translateY: [12, 0], delay: anime.stagger(80), duration: 500 }), "-=250");
+    document.querySelectorAll(".stat-num").forEach(function (el) {
+      IC.countUp(el, parseFloat(el.dataset.target), el.dataset.suffix, 650);
+    });
+  } else {
+    document.querySelectorAll(".anim-hidden").forEach(function (el) { el.style.opacity = "1"; });
+    document.querySelectorAll(".stat-num").forEach(function (el) {
+      el.textContent = el.dataset.target + (el.dataset.suffix || "");
+    });
+  }
+
+  /* ---------- scroll reveal (§3.2) ---------- */
+  IC.onEnter(document.getElementById("revealHeading"), IC.revealWords);
+  ["darkLede", "darkActions", "featuresHead", "subjectsHead", "ctaInner"].forEach(function (id) {
+    var el = document.getElementById(id);
+    IC.onEnter(el, function (t) { IC.fadeUp(t); });
+  });
+  IC.onEnter(document.getElementById("browserFrame"), function (el) {
+    if (!IC.canAnimate) { el.style.opacity = "1"; return; }
+    anime.animate(el, IC.m({ opacity: [0, 1], translateY: [30, 0], scale: [0.97, 1], duration: 700, ease: "outExpo" }));
+    /* hàng bảng bên trong hiện so le sau khi khung đã vào */
+    anime.animate(el.querySelectorAll("tbody tr"), IC.m({
+      opacity: [0, 1], translateX: [-10, 0], delay: anime.stagger(80, { start: 350 }), duration: 400, ease: "outQuad"
+    }));
+    anime.animate(el.querySelectorAll(".b-sidebar .brow"), IC.m({
+      opacity: [0, 1], translateX: [-8, 0], delay: anime.stagger(60, { start: 250 }), duration: 350, ease: "outQuad"
+    }));
+  });
+  [document.getElementById("featuresGrid"), document.getElementById("subjectsGrid")].forEach(function (g) {
+    IC.onEnter(g, function (grid) {
+      IC.staggerChildren(grid, ".card-dark");
+      grid.querySelectorAll(".subj-bar-fill").forEach(function (bar) {
+        IC.fillBar(bar, parseFloat(bar.dataset.target));
+      });
+      /* ô heatmap nở ra lần lượt khi card lịch ôn tập xuất hiện */
+      var cells = grid.querySelectorAll(".heatmap i");
+      if (cells.length && IC.canAnimate) {
+        anime.animate(cells, IC.m({
+          opacity: [0, 1], scale: [0.4, 1], delay: anime.stagger(18, { start: 400 }), duration: 300, ease: "outQuad"
+        }));
+      }
+    });
+  });
+  IC.onEnter(document.querySelector("footer"), function (t) { IC.fadeUp(t, 8, 400); });
+
+  IC.magnetize(document);
+  IC.scrollProgress();
+  IC.initLangToggle();
+})();
+</script>
+</body>
+</html>

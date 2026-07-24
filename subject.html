@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghi chú môn học — IC.note</title>
+<link rel="stylesheet" href="assets/css/fonts.css?v=5">
+<link rel="stylesheet" href="assets/css/main.css?v=5">
+</head>
+<body>
+<div id="scrollbar"></div>
+
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="mark"></span>IC.note</a>
+  <nav class="toplinks">
+    <a href="index.html#subjects">Môn học</a>
+    <a href="subject.html" class="active">Ghi chú</a>
+    <a href="quiz.html">Quiz</a>
+  </nav>
+  <div class="topbar-right">
+    <div class="lang-toggle" data-lang-toggle>
+      <button data-lang-opt="vi">VI</button>
+      <button data-lang-opt="en">EN</button>
+    </div>
+    <a class="cta-mini" href="quiz.html" id="quizLink">Làm quiz môn này</a>
+  </div>
+</header>
+
+<div class="page-head anim-hidden" id="pageHead">
+  <div>
+    <p class="kicker" style="font-size:12px;font-weight:600;color:var(--accent-strong);letter-spacing:0.06em;text-transform:uppercase;margin:0 0 6px" id="subjectTag">—</p>
+    <h1 id="subjectName">—</h1>
+    <p class="sub" id="subjectDesc">—</p>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-label"><span>Tiến độ</span><span id="progressText">0/0 chương</span></div>
+    <div class="progress-track-light"><div class="progress-fill-light" id="progressBar"></div></div>
+  </div>
+</div>
+
+<div class="notebook anim-hidden" id="notebook" style="padding:0">
+  <aside class="chapter-nav">
+    <h4 id="navTitle">Chương</h4>
+    <div id="chapterList"></div>
+  </aside>
+  <div class="chapter-content">
+    <select class="chapter-select" id="chapterSelect" aria-label="Chọn chương"></select>
+    <p class="kicker" id="chKicker">—</p>
+    <h2 id="chTitle">—</h2>
+    <div class="note-body" id="chBody"></div>
+    <div class="chapter-actions">
+      <button class="pill-btn ghost-light sm" id="btnPrev">← Chương trước</button>
+      <button class="pill-btn primary sm" id="btnNext">Chương sau →</button>
+      <button class="mark-done" id="btnDone"><span class="box"></span><span id="doneLabel">Đánh dấu đã học xong</span></button>
+    </div>
+  </div>
+</div>
+
+<footer>IC.note — sổ tay ôn thi vi mạch bán dẫn</footer>
+
+<script src="assets/js/anime.iife.min.js?v=5"></script>
+<script src="assets/js/data.js?v=5"></script>
+<script src="assets/js/app.js?v=5"></script>
+<script>
+(function () {
+  var subject = IC.findSubject(IC.param("mon"));
+  var chIndex = 0;
+  var startCh = IC.param("chuong");
+  if (startCh) {
+    var found = subject.chapters.findIndex(function (c) { return c.id === startCh; });
+    if (found >= 0) chIndex = found;
+  }
+
+  var L = {
+    chapterWord: { vi: "chương", en: "chapters" },
+    done: { vi: "Đã học xong", en: "Done" },
+    markDone: { vi: "Đánh dấu đã học xong", en: "Mark as done" },
+    nextChapter: { vi: "Chương sau →", en: "Next chapter →" },
+    nextQuiz: { vi: "Làm quiz môn này →", en: "Take this subject's quiz →" },
+    chapterLabel: { vi: "Chương", en: "Chapter" }
+  };
+
+  function applyStaticText() {
+    document.title = IC.t(subject.name) + " — IC.note";
+    document.getElementById("subjectTag").textContent = IC.t(subject.tag);
+    document.getElementById("subjectName").textContent = IC.t(subject.name);
+    document.getElementById("subjectDesc").textContent = IC.t(subject.desc);
+    document.getElementById("navTitle").textContent = IC.t(subject.name);
+    document.getElementById("quizLink").href = "quiz.html?mon=" + subject.id;
+  }
+  applyStaticText();
+
+  var listEl = document.getElementById("chapterList");
+  var selectEl = document.getElementById("chapterSelect");
+
+  function renderProgress() {
+    var p = IC.subjectProgress(subject);
+    document.getElementById("progressText").textContent = p.done + "/" + p.total + " " + IC.t(L.chapterWord) + " · " + p.pct + "%";
+    document.getElementById("progressBar").style.width = p.pct + "%";
+  }
+
+  function renderNav() {
+    var done = IC.getDone(subject.id);
+    listEl.innerHTML = "";
+    selectEl.innerHTML = "";
+    subject.chapters.forEach(function (c, i) {
+      var b = document.createElement("button");
+      b.className = "chapter-item" + (i === chIndex ? " active" : "");
+      b.innerHTML = '<span class="num">' + String(i + 1).padStart(2, "0") + "</span>" +
+        "<span>" + IC.t(c.title) + "</span>" + (done[c.id] ? '<span class="done">✓</span>' : "");
+      b.addEventListener("click", function () { go(i); });
+      listEl.appendChild(b);
+
+      var opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = String(i + 1).padStart(2, "0") + ". " + IC.t(c.title) + (done[c.id] ? " ✓" : "");
+      selectEl.appendChild(opt);
+    });
+    selectEl.value = chIndex;
+  }
+
+  function renderChapter(animateIn) {
+    var c = subject.chapters[chIndex];
+    var done = IC.getDone(subject.id);
+    document.getElementById("chKicker").textContent = IC.t(L.chapterLabel) + " " + String(chIndex + 1).padStart(2, "0");
+    document.getElementById("chTitle").textContent = IC.t(c.title);
+    document.getElementById("chBody").innerHTML = IC.t(c.html);
+
+    var btnDone = document.getElementById("btnDone");
+    var isDone = !!done[c.id];
+    btnDone.classList.toggle("checked", isDone);
+    document.getElementById("doneLabel").textContent = isDone ? IC.t(L.done) : IC.t(L.markDone);
+
+    document.getElementById("btnPrev").disabled = chIndex === 0;
+    document.getElementById("btnNext").textContent =
+      chIndex === subject.chapters.length - 1 ? IC.t(L.nextQuiz) : IC.t(L.nextChapter);
+
+    if (animateIn && IC.canAnimate) {
+      anime.animate("#chKicker, #chTitle, #chBody", IC.m({
+        opacity: [0, 1], translateY: [10, 0], delay: anime.stagger(70), duration: 400, ease: "outQuad"
+      }));
+    }
+  }
+
+  function go(i) {
+    chIndex = Math.max(0, Math.min(subject.chapters.length - 1, i));
+    renderNav();
+    renderChapter(true);
+  }
+
+  document.getElementById("btnPrev").addEventListener("click", function () { go(chIndex - 1); });
+  document.getElementById("btnNext").addEventListener("click", function () {
+    if (chIndex === subject.chapters.length - 1) {
+      location.href = "quiz.html?mon=" + subject.id;
+    } else go(chIndex + 1);
+  });
+  selectEl.addEventListener("change", function () { go(parseInt(selectEl.value, 10)); });
+  document.getElementById("btnDone").addEventListener("click", function () {
+    var c = subject.chapters[chIndex];
+    var isDone = !!IC.getDone(subject.id)[c.id];
+    IC.setDone(subject.id, c.id, !isDone);
+    renderNav();
+    renderChapter(false);
+    renderProgress();
+  });
+
+  renderNav();
+  renderChapter(false);
+  renderProgress();
+
+  document.addEventListener("icnote:langchange", function () {
+    applyStaticText();
+    renderNav();
+    renderChapter(false);
+    renderProgress();
+  });
+
+  /* intro */
+  if (IC.canAnimate) {
+    anime.animate("#pageHead", IC.m({ opacity: [0, 1], translateY: [12, 0], duration: 500, ease: "outQuad" }));
+    anime.animate("#notebook", IC.m({ opacity: [0, 1], translateY: [18, 0], duration: 600, delay: 120, ease: "outQuad" }));
+  } else {
+    document.querySelectorAll(".anim-hidden").forEach(function (el) { el.style.opacity = "1"; });
+  }
+  IC.scrollProgress();
+  IC.initLangToggle();
+})();
+</script>
+</body>
+</html>

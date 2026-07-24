@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — IC.note</title>
+<link rel="stylesheet" href="assets/css/fonts.css?v=5">
+<link rel="stylesheet" href="assets/css/main.css?v=5">
+</head>
+<body style="background:var(--bg-soft)">
+<div id="scrollbar"></div>
+
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="mark"></span>IC.note</a>
+  <nav class="toplinks">
+    <a href="index.html#subjects">Môn học</a>
+    <a href="subject.html">Ghi chú</a>
+    <a href="quiz.html" class="active">Quiz</a>
+  </nav>
+  <div class="topbar-right">
+    <div class="lang-toggle" data-lang-toggle>
+      <button data-lang-opt="vi">VI</button>
+      <button data-lang-opt="en">EN</button>
+    </div>
+    <a class="cta-mini" href="index.html">Trang chủ</a>
+  </div>
+</header>
+
+<div class="quiz-wrap">
+  <div class="quiz-head anim-hidden" id="quizHead">
+    <div id="quizMeta">—</div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div id="examTimer" style="display:none;font-weight:700;color:var(--err)"></div>
+      <div class="quiz-score-pill"><span id="scoreLabel">Điểm</span>: <span id="qScore">0</span>/<span id="qTotal">0</span></div>
+    </div>
+  </div>
+
+  <div class="quiz-card anim-hidden" id="quizCard">
+    <p class="quiz-tag" id="qTag">—</p>
+    <p class="quiz-q" id="qText">—</p>
+    <div class="options" id="qOptions"></div>
+    <div class="quiz-explain" id="qExplain"></div>
+    <div class="quiz-foot">
+      <button class="pill-btn primary" id="qNext" disabled>Câu tiếp theo →</button>
+    </div>
+  </div>
+
+  <div class="quiz-card anim-hidden" id="summaryCard" style="display:none">
+    <div class="quiz-summary">
+      <div class="big" id="sumScore">0/0</div>
+      <p id="sumText">—</p>
+      <div class="weak-list" id="sumWeak"></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="pill-btn primary" id="btnRetry">Làm lại</button>
+        <a class="pill-btn ghost-light" id="btnBackNotes" href="subject.html">Ôn lại ghi chú</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>IC.note — sổ tay ôn thi vi mạch bán dẫn</footer>
+
+<script src="assets/js/anime.iife.min.js?v=5"></script>
+<script src="assets/js/data.js?v=5"></script>
+<script src="assets/js/app.js?v=5"></script>
+<script>
+(function () {
+  var L = {
+    examTitle: { vi: "Thi thử — IC.note", en: "Mock exam — IC.note" },
+    examMeta: { vi: "Thi thử tổng hợp", en: "Combined mock exam" },
+    subjectsWord: { vi: "môn", en: "subjects" },
+    questionWord: { vi: "Câu", en: "Question" },
+    seeResult: { vi: "Xem kết quả →", en: "See result →" },
+    nextQuestion: { vi: "Câu tiếp theo →", en: "Next question →" },
+    timeUp: { vi: "Hết giờ! ", en: "Time's up! " },
+    excellent: { vi: "Xuất sắc — giữ vững phong độ nhé.", en: "Excellent — keep up the good work." },
+    okish: { vi: "Khá ổn — ôn thêm mấy chương bên dưới là chắc bài.", en: "Pretty good — review the chapters below to lock it in." },
+    needReview: { vi: "Cần ôn lại — bắt đầu từ các chương được gợi ý bên dưới.", en: "Needs review — start with the suggested chapters below." },
+    reviewLink: { vi: "Ôn lại: ", en: "Review: " },
+    noMistakes: { vi: "Không sai câu nào 🎉", en: "No mistakes 🎉" },
+    noQuiz: { vi: "Môn này chưa có câu hỏi quiz — hãy quay lại sau khi nội dung được nạp.", en: "This subject has no quiz questions yet — check back once content has been loaded." },
+    backHome: { vi: "← Về trang chủ", en: "← Back to home" },
+    scoreLabel: { vi: "Điểm", en: "Score" },
+    retry: { vi: "Làm lại", en: "Retry" },
+    reviewNotes: { vi: "Ôn lại ghi chú", en: "Review notes" }
+  };
+
+  var mode = IC.param("mode"); // "exam" = thi thử trộn 4 môn + đếm giờ
+  var subject = IC.findSubject(IC.param("mon"));
+  var EXAM_SECONDS = 10 * 60;
+
+  /* danh sách câu hỏi gốc cho phiên này (chưa dịch ngôn ngữ) */
+  var rawQuestions;
+  if (mode === "exam") {
+    rawQuestions = [];
+    IC_DATA.subjects.forEach(function (s) {
+      s.quiz.forEach(function (q) {
+        rawQuestions.push(Object.assign({ _subject: s }, q));
+      });
+    });
+    /* xáo trộn Fisher–Yates (1 lần, giữ nguyên khi đổi ngôn ngữ) */
+    for (var i = rawQuestions.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = rawQuestions[i]; rawQuestions[i] = rawQuestions[j]; rawQuestions[j] = t;
+    }
+  } else {
+    rawQuestions = subject.quiz.map(function (q) { return Object.assign({ _subject: subject }, q); });
+  }
+  var questions = rawQuestions;
+
+  if (!questions.length) {
+    document.querySelector(".quiz-wrap").innerHTML =
+      '<div class="quiz-card" style="text-align:center"><p style="color:var(--text-muted)">' + IC.t(L.noQuiz) + '</p>' +
+      '<a class="pill-btn ghost-light" href="index.html" style="margin-top:14px;display:inline-flex">' + IC.t(L.backHome) + '</a></div>';
+    IC.scrollProgress();
+    IC.initLangToggle();
+    document.addEventListener("icnote:langchange", function () {
+      document.querySelector(".quiz-card p").textContent = IC.t(L.noQuiz);
+      document.querySelector(".quiz-card a").textContent = IC.t(L.backHome);
+    });
+    return;
+  }
+
+  var idx = 0, score = 0, answered = false;
+  var wrongByChapter = {}; /* gom theo môn: { subjectId: { chapterId: n } } */
+
+  var qMeta = document.getElementById("quizMeta");
+  var qScoreEl = document.getElementById("qScore");
+  var qTotalEl = document.getElementById("qTotal");
+  var qTag = document.getElementById("qTag");
+  var qText = document.getElementById("qText");
+  var qOptions = document.getElementById("qOptions");
+  var qExplain = document.getElementById("qExplain");
+  var qNext = document.getElementById("qNext");
+  var keys = ["A", "B", "C", "D"];
+
+  function applyHeadText() {
+    document.title = mode === "exam" ? IC.t(L.examTitle) : IC.t(subject.name) + " — IC.note";
+    qTotalEl.textContent = questions.length;
+    qMeta.textContent = mode === "exam"
+      ? IC.t(L.examMeta) + " · " + IC_DATA.subjects.length + " " + IC.t(L.subjectsWord)
+      : IC.t(subject.name);
+    document.getElementById("scoreLabel").textContent = IC.t(L.scoreLabel);
+    document.getElementById("btnRetry").textContent = IC.t(L.retry);
+    document.getElementById("btnBackNotes").textContent = IC.t(L.reviewNotes);
+  }
+  applyHeadText();
+
+  /* đồng hồ thi thử */
+  var timerId = null;
+  if (mode === "exam") {
+    var timerEl = document.getElementById("examTimer");
+    timerEl.style.display = "block";
+    var remain = EXAM_SECONDS;
+    function tick() {
+      var m = Math.floor(remain / 60), s = remain % 60;
+      timerEl.textContent = "⏱ " + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+      if (remain <= 0) { clearInterval(timerId); showSummary(true); return; }
+      remain--;
+    }
+    tick();
+    timerId = setInterval(tick, 1000);
+  }
+
+  function render() {
+    var item = questions[idx];
+    qTag.textContent = IC.t(item._subject.name) + (item.chapterId ? " · " + chapterTitle(item) : "");
+    qText.textContent = IC.t(L.questionWord) + " " + (idx + 1) + "/" + questions.length + ". " + IC.t(item.q);
+    qExplain.classList.remove("show");
+    qExplain.textContent = "";
+    qNext.disabled = true;
+    answered = false;
+    qNext.textContent = idx === questions.length - 1 ? IC.t(L.seeResult) : IC.t(L.nextQuestion);
+    qOptions.innerHTML = "";
+    IC.t(item.opts).forEach(function (opt, i) {
+      var b = document.createElement("button");
+      b.className = "option";
+      b.innerHTML = '<span class="mark">' + keys[i] + "</span><span>" + opt + "</span>";
+      b.addEventListener("click", function () { select(i, b); });
+      qOptions.appendChild(b);
+    });
+    if (IC.canAnimate) {
+      anime.animate(qOptions.querySelectorAll(".option"), IC.m({
+        opacity: [0, 1], translateY: [8, 0], delay: anime.stagger(50), duration: 300, ease: "outQuad"
+      }));
+    }
+  }
+
+  function chapterTitle(item) {
+    var ch = item._subject.chapters.find(function (c) { return c.id === item.chapterId; });
+    return ch ? IC.t(ch.title) : "";
+  }
+
+  function select(i, btn) {
+    if (answered) return;
+    answered = true;
+    var item = questions[idx];
+    var all = qOptions.querySelectorAll(".option");
+    all.forEach(function (b) { b.disabled = true; });
+    var pass = i === item.correct;
+    if (pass) {
+      btn.classList.add("correct");
+      score++;
+      if (IC.canAnimate) anime.animate(btn, IC.m({ scale: [1, 1.02, 1], duration: 260, ease: "outQuad" }));
+    } else {
+      btn.classList.add("wrong");
+      all[item.correct].classList.add("correct");
+      var sid = item._subject.id;
+      wrongByChapter[sid] = wrongByChapter[sid] || {};
+      wrongByChapter[sid][item.chapterId] = (wrongByChapter[sid][item.chapterId] || 0) + 1;
+      if (IC.canAnimate) anime.animate(btn, IC.m({ translateX: [0, -5, 5, -3, 3, 0], duration: 320, ease: "inOutQuad" }));
+    }
+    qScoreEl.textContent = score;
+    if (mode !== "exam") {
+      qExplain.textContent = IC.t(item.explain);
+      qExplain.classList.add("show");
+      if (IC.canAnimate) anime.animate(qExplain, IC.m({ opacity: [0, 1], translateY: [-4, 0], duration: 220, ease: "outQuad" }));
+    }
+    qNext.disabled = false;
+  }
+
+  function showSummary(timeUp) {
+    if (timerId) clearInterval(timerId);
+    document.getElementById("quizCard").style.display = "none";
+    var card = document.getElementById("summaryCard");
+    card.style.display = "block";
+    card.style.opacity = "1";
+    document.getElementById("sumScore").textContent = score + "/" + questions.length;
+    var pct = questions.length ? Math.round(score * 100 / questions.length) : 0;
+    document.getElementById("sumText").textContent =
+      (timeUp ? IC.t(L.timeUp) : "") +
+      (pct >= 80 ? IC.t(L.excellent) :
+       pct >= 50 ? IC.t(L.okish) :
+       IC.t(L.needReview));
+
+    /* lưu kết quả + điểm yếu theo từng môn */
+    var perSubject = {};
+    questions.forEach(function (q) {
+      perSubject[q._subject.id] = (perSubject[q._subject.id] || 0) + 1;
+    });
+    Object.keys(perSubject).forEach(function (sid) {
+      IC.saveQuizResult(sid, score, questions.length, (wrongByChapter[sid] || {}));
+    });
+
+    /* hiện tag điểm yếu */
+    var weakEl = document.getElementById("sumWeak");
+    var chips = [];
+    Object.keys(wrongByChapter).forEach(function (sid) {
+      var s = IC_DATA.subjects.find(function (x) { return x.id === sid; });
+      Object.keys(wrongByChapter[sid]).forEach(function (chId) {
+        var ch = s.chapters.find(function (c) { return c.id === chId; });
+        if (ch) chips.push({ sid: sid, chId: chId, title: IC.t(ch.title), n: wrongByChapter[sid][chId] });
+      });
+    });
+    if (chips.length) {
+      chips.sort(function (a, b) { return b.n - a.n; });
+      weakEl.innerHTML = chips.map(function (c) {
+        return '<a class="weak-chip" href="subject.html?mon=' + c.sid + "&chuong=" + c.chId + '">' + IC.t(L.reviewLink) + c.title + "</a>";
+      }).join("");
+    } else {
+      weakEl.innerHTML = '<span class="weak-chip" style="background:var(--ok-tint);color:var(--ok)">' + IC.t(L.noMistakes) + '</span>';
+    }
+    document.getElementById("btnBackNotes").href = "subject.html?mon=" + (mode === "exam" ? IC_DATA.subjects[0].id : subject.id);
+
+    if (IC.canAnimate) {
+      anime.animate(card, IC.m({ opacity: [0, 1], translateY: [16, 0], duration: 500, ease: "outQuad" }));
+      var proxy = { v: 0 };
+      var el = document.getElementById("sumScore");
+      anime.animate(proxy, {
+        v: score, duration: 900, ease: "outCubic",
+        onUpdate: function () { el.textContent = Math.round(proxy.v) + "/" + questions.length; }
+      });
+    }
+  }
+
+  qNext.addEventListener("click", function () {
+    if (idx === questions.length - 1) { showSummary(false); return; }
+    idx++;
+    render();
+  });
+  document.getElementById("btnRetry").addEventListener("click", function () { location.reload(); });
+
+  document.addEventListener("icnote:langchange", function () {
+    applyHeadText();
+    if (document.getElementById("summaryCard").style.display === "block") {
+      showSummary(false);
+    } else {
+      render();
+    }
+  });
+
+  render();
+  if (IC.canAnimate) {
+    anime.animate("#quizHead", IC.m({ opacity: [0, 1], translateY: [10, 0], duration: 450, ease: "outQuad" }));
+    anime.animate("#quizCard", IC.m({ opacity: [0, 1], translateY: [16, 0], duration: 550, delay: 100, ease: "outQuad" }));
+  } else {
+    document.querySelectorAll(".anim-hidden").forEach(function (el) { el.style.opacity = "1"; });
+  }
+  IC.scrollProgress();
+  IC.initLangToggle();
+})();
+</script>
+</body>
+</html>
